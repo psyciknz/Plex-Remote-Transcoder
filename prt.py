@@ -162,9 +162,22 @@ def get_system_load_remote(host, port, user):
     """
     Gets the result from ``get_system_load_local`` of a remote machine.
     """
-    proc = subprocess.Popen(["ssh", "%s@%s" % (user, host), "-p", port, "prt", "get_load"], stdout=subprocess.PIPE)
+    log.info("Running SSH connection")
+    log.info("Testing Library Path")
+    if '/lib/x86_64-linux-gnu/' not in os.environ['LD_LIBRARY_PATH']: 
+        log.info("Need to add to LD_LIBRARY_PATH")
+        os.environ['LD_LIBRARY_PATH'] = '/lib/x86_64-linux-gnu/:' + os.environ['LD_LIBRARY_PATH']
+    else:
+        log.info('Library Path contains correct library')
+
+
+
+    proc = subprocess.Popen(["ssh", "%s@%s" % (user, host), "-v", "-p", port, "prt", "get_load"], stdout=subprocess.PIPE, env=os.environ, stderr=subprocess.PIPE)
     proc.wait()
-    return [float(i) for i in proc.stdout.read().strip().split()]
+    stdout =  proc.stdout.read()
+    log.info("STDOUT: " + stdout)
+    #log.info("STDERR: " + proc.stderr.read())
+    return [float(i) for i in stdout.strip().split()]
 
 
 def setup_logging():
@@ -655,6 +668,19 @@ def main():
 
     if sys.argv[1] == "get_load":
         print " ".join([str(i) for i in get_system_load_local()])
+    elif sys.argv[1] == "ldd":
+        proc = subprocess.Popen(["ldd", "/usr/lib/plexmediaserver/lib/libcrypto.so.1.0.0"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = proc.stdout.readlines()
+        print("ldd Plex: " + " ".join([str(s) for s in result]))
+        proc = subprocess.Popen(["ldd", "/lib/x86_64-linux-gnu/libcrypto.so.1.0.0"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = proc.stdout.readlines()
+        print("ldd: " + " ".join([str(s) for s in result]))
+    elif sys.argv[1] == "ssh":
+        proc = subprocess.Popen(["ssh", "plex@folco.andc.nz", "-v", "-p", "8022", "prt", "get_load"], stdout=subprocess.PIPE, env=os.environ, stderr=subprocess.PIPE)
+        proc.wait()
+        print("STDOUT: " + proc.stdout.read())
+        print("STDERR: " + proc.stderr.read())
+
 
     elif sys.argv[1] == "get_cluster_load":
         print "Cluster Load"
