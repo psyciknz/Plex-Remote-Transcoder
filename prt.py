@@ -328,6 +328,16 @@ def transcode_remote():
         log.info("Found EAE is being used...forcing local transcode")
         return transcode_local()
 
+    # FIX: For transcodes of tuners, they request from local host, they may need to be either
+    #      pointed at the plex host (maybe?) or something else.
+    #      Anyway, forcing local transcode.
+    if 'http://127.0.0.1:32600/devices/' in ' '.join(args):
+        log.info("Found Live TV request...forcing local transcode")
+        return transcode_local()
+    if 'http://127.0.0.1:32400/livetv/' in ' '.join(args):
+        log.info("Found Live TV request...forcing local transcode")
+        return transcode_local()
+
     # Check to see if we need to call a user-script to replace/modify the file path
     if config.get("path_script", None):
         idx = 0
