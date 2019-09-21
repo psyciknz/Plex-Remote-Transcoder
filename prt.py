@@ -332,6 +332,7 @@ def transcode_remote():
 
     config = get_config()
     args   = sys.argv[1:]
+    log.info("ARGS: " + ' '.join(args)
 
 
     # FIX: This is (temporary?) fix for the EasyAudioEncoder (EAE) which uses a
@@ -668,20 +669,6 @@ def main():
 
     if sys.argv[1] == "get_load":
         print " ".join([str(i) for i in get_system_load_local()])
-    elif sys.argv[1] == "ldd":
-        proc = subprocess.Popen(["ldd", "/usr/lib/plexmediaserver/lib/libcrypto.so.1.0.0"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        result = proc.stdout.readlines()
-        print("ldd Plex: " + " ".join([str(s) for s in result]))
-        proc = subprocess.Popen(["ldd", "/lib/x86_64-linux-gnu/libcrypto.so.1.0.0"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        result = proc.stdout.readlines()
-        print("ldd: " + " ".join([str(s) for s in result]))
-    elif sys.argv[1] == "ssh":
-        proc = subprocess.Popen(["ssh", "plex@folco.andc.nz", "-v", "-p", "8022", "prt", "get_load"], stdout=subprocess.PIPE, env=os.environ, stderr=subprocess.PIPE)
-        proc.wait()
-        print("STDOUT: " + proc.stdout.read())
-        print("STDERR: " + proc.stderr.read())
-
-
     elif sys.argv[1] == "get_cluster_load":
         print "Cluster Load"
         config = get_config()
