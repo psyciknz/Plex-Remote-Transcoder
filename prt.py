@@ -332,7 +332,7 @@ def transcode_remote():
 
     config = get_config()
     args   = sys.argv[1:]
-    log.info("ARGS: " + ' '.join(args)
+    #log.info("ARGS: " + ' '.join(args))
 
 
     # FIX: This is (temporary?) fix for the EasyAudioEncoder (EAE) which uses a
@@ -350,6 +350,12 @@ def transcode_remote():
         return transcode_local()
     if 'http://127.0.0.1:32400/livetv/' in ' '.join(args):
         log.info("Found Live TV request...forcing local transcode")
+        return transcode_local()
+
+    #Identify direct stream (transcode argsd = codec:1 and 0 = copy) and force local
+    #otherwise it has network impact.
+    if '-codec:0 copy' in ' '.join(args) and '-codec:1 copy'  in ' '.join(args):
+        log.info("Direct Stream Identified, send to local transcode (no slaves)")
         return transcode_local()
 
     # Check to see if we need to call a user-script to replace/modify the file path
